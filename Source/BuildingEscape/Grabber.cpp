@@ -3,6 +3,7 @@
 #include "Grabber.h"
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
+#include "Components/PrimitiveComponent.h"
 
 
 // Sets default values for this component's properties
@@ -22,26 +23,9 @@ void UGrabber::BeginPlay()
 	Super::BeginPlay();
 
 	Player = GetOwner();
-	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	FindPhysicsHandleComponent();
+	SetupInputComponent();
 	
-	if(PhysicsHandle != nullptr){}
-	else {
-		UE_LOG(LogTemp, Error, TEXT("%s missing handle component "), *GetOwner()->GetName());
-	}
-
-	if (InputComponent != nullptr) 
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Input component found "));
-		//bind the input axis
-
-		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
-		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
-
-	}
-	else {
-		UE_LOG(LogTemp, Error, TEXT("%s missing Input component "), *GetOwner()->GetName());
-	}
 }
 
 
@@ -53,11 +37,66 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	FVector LookPos;
 	FRotator LookRot;
 	Player->GetActorEyesViewPoint(LookPos, LookRot);
-
 	FVector LineEnd = LookPos + LookRot.Vector() * Reach;
 
-	DrawDebugLine(GetWorld(), LookPos, LineEnd, FColor(255, 0, 0), false, 0.f, 0.f, 10.f);
+	if (PhysicsHandle->GrabbedComponent) 
+	{
+		PhysicsHandle->SetTargetLocation(LineEnd);
+	}
+}
 
+void UGrabber::Grab()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
+
+	auto HitResult = GetFirstPhysicsBodyInReach();
+	auto ComponentToGrab = HitResult.GetComponent();
+	auto HitActor = HitResult.GetActor();
+
+	if(HitActor != nullptr) PhysicsHandle->GrabComponent(ComponentToGrab, NAME_None, ComponentToGrab->GetOwner()->GetActorLocation(), true);
+}
+
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Released"));
+
+	PhysicsHandle->ReleaseComponent();
+}
+
+void UGrabber::FindPhysicsHandleComponent()
+{
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+
+	if (PhysicsHandle != nullptr) {}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("%s missing handle component "), *GetOwner()->GetName());
+	}
+
+}
+
+void UGrabber::SetupInputComponent()
+{
+	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+
+	if (InputComponent != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Input component found "));
+		
+		//bind the input axis
+		InputComponent->BindAction("Grab", IE_Pressed, this, &UGrabber::Grab);
+		InputComponent->BindAction("Grab", IE_Released, this, &UGrabber::Release);
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("%s missing Input component "), *GetOwner()->GetName());
+	}
+}
+
+FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
+{
+	FVector LookPos;
+	FRotator LookRot;
+	Player->GetActorEyesViewPoint(LookPos, LookRot);
+	FVector LineEnd = LookPos + LookRot.Vector() * Reach;
 	FHitResult Hit;
 
 	GetWorld()->LineTraceSingleByObjectType(
@@ -69,18 +108,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	);
 
 	AActor* HitActor = Hit.GetActor();
+	if (HitActor != nullptr) UE_LOG(LogTemp, Warning, TEXT("HIT: %s"), *Hit.GetActor()->GetName());
 
-	if(HitActor != nullptr) UE_LOG(LogTemp, Warning, TEXT("HIT: %s"), *Hit.GetActor()->GetName());
-}
-
-void UGrabber::Grab()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
-}
-
-void UGrabber::Release()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Released"));
-
+	return Hit;
 }
 
