@@ -3,7 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Components/ActorComponent.h"
+#include "Classes/Components/InputComponent.h"
+
 #include "Grabber.generated.h"
 
 
@@ -25,7 +28,14 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+
 	float Reach = 100.f;
 	AActor* Player;
 	
+	UPhysicsHandleComponent* PhysicsHandle = nullptr;
+	UInputComponent* InputComponent = nullptr;
+
+	//RayCast and Grab 
+	void Grab();
+	void Release();
 };
