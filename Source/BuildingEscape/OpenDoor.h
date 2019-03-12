@@ -40,12 +40,10 @@ private:
 	UPROPERTY(EditAnywhere)
 		float DoorCloseDelay = 1.f;
 
-	UPROPERTY(VisibleAnywhere)
-		AActor* ActorThatOpens;
 
 	float LastDoorOpenTime;
 
 	void OpenDoor();
 	void CloseDoor();
-
+	float GetTotalMassOnPlate();
 };
