@@ -30,8 +30,7 @@ public:
 private:
 
 	float Reach = 100.f;
-	AActor* Player;
-	
+	AActor* Player = nullptr;
 	UPhysicsHandleComponent* PhysicsHandle = nullptr;
 	UInputComponent* InputComponent = nullptr;
 

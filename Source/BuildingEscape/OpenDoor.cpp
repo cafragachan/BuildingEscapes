@@ -24,7 +24,10 @@ void UOpenDoor::BeginPlay()
 
 	//Find the owning Actor
     Owner = GetOwner();
-	
+	if (PressurePlate == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s Pressure Plate is NUll"), *GetOwner()->GetName());
+	}
 }
 
 
@@ -61,6 +64,9 @@ float UOpenDoor::GetTotalMassOnPlate()
 	float TotalMass = 0.f;
 	TArray<AActor*> ActorsOnPlate;
 	TArray<UPrimitiveComponent*> OverlappingComponents;
+
+	if (PressurePlate == nullptr) return TotalMass;
+	
 
 	PressurePlate->GetOverlappingActors(ActorsOnPlate);
 
