@@ -37,27 +37,16 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	//Poll the trigger volume every frame
-	if (GetTotalMassOnPlate() > 30.f)
+	if (GetTotalMassOnPlate() >= TriggerMass)
 	{
-		OpenDoor();
-		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
+		OnOpenRequest.Broadcast();
 	}
-
-	if (GetWorld()->GetTimeSeconds() - LastDoorOpenTime >= DoorCloseDelay)
+	else
 	{
-		CloseDoor();
+		OnCloseRequest.Broadcast();
 	}
 }
 
-void UOpenDoor::OpenDoor()
-{
-	Owner->SetActorRotation(FRotator(0.f, OpenAngle, 0.f));
-}
-
-void UOpenDoor::CloseDoor()
-{
-	Owner->SetActorRotation(FRotator(0.f, 0, 0.f));
-}
 
 float UOpenDoor::GetTotalMassOnPlate()
 {
@@ -66,19 +55,13 @@ float UOpenDoor::GetTotalMassOnPlate()
 	TArray<UPrimitiveComponent*> OverlappingComponents;
 
 	if (PressurePlate == nullptr) return TotalMass;
-	
-
 	PressurePlate->GetOverlappingActors(ActorsOnPlate);
 
-	for (const auto* Actor : ActorsOnPlate) {
-
+	for (const auto* Actor : ActorsOnPlate) 
+	{
 		UE_LOG(LogTemp, Warning, TEXT("Actor onPlate:  %s"), *Actor->GetName());
-
 		TotalMass += Actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
 	}
-
-	//UE_LOG(LogTemp, Warning, TEXT("Mass onPlate:  %s"), *FString::SanitizeFloat(TotalMass));
-
 	return TotalMass;
 }
 
