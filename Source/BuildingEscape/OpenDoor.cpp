@@ -16,7 +16,7 @@ UOpenDoor::UOpenDoor()
 
 }
 
-
+//hey
 // Called when the game starts
 void UOpenDoor::BeginPlay()
 {
