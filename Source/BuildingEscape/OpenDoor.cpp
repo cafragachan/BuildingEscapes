@@ -16,7 +16,7 @@ UOpenDoor::UOpenDoor()
 
 }
 
-//hey
+//final commit
 // Called when the game starts
 void UOpenDoor::BeginPlay()
 {
