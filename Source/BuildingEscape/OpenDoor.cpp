@@ -39,11 +39,15 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	//Poll the trigger volume every frame
 	if (GetTotalMassOnPlate() >= TriggerMass)
 	{
-		OnOpenRequest.Broadcast();
+		UE_LOG(LogTemp, Warning, TEXT("Mass OK"));
+
+		OnOpen.Broadcast();
 	}
 	else
 	{
-		OnCloseRequest.Broadcast();
+		UE_LOG(LogTemp, Warning, TEXT("Mass NOT OK"));
+
+		OnClose.Broadcast();
 	}
 }
 
